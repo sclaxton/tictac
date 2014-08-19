@@ -1,6 +1,5 @@
 from tictac import Game, Board, AI
 
-
 players = ['x', 'o']
 size = 3
 
