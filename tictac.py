@@ -1,6 +1,8 @@
+import sys
 import random
 from utils import enumerate2
 from copy import deepcopy
+
 
 random.seed()
 
@@ -11,7 +13,9 @@ class Game(object):
   def __init__(self, board):
     self.board = board
     self.players = board.players
-    self.currentPly = 0
+    self.ply = 0
+    self.winner = None
+    self.isOver = False
 
 """The Board Class abstracts away the game board."""
 class Board(object):
@@ -347,8 +351,11 @@ class AI(object):
         if board.square(i, j) is None:
           blanks.push((i, j))
     size = len(blanks)
-    index = random.randint(0, size-1)
-    return blanks[index]
+    if size > 0:
+      index = random.randint(0, size-1)
+      return blanks[index]
+    else:
+      return ()
 
   """Method uses a rule-based expert system to determine optimal move."""
   def move(self):
@@ -379,17 +386,81 @@ class AI(object):
     # move to the center
     center = (board.size-1)/2
     if board.square(center, center) is None:
-      board.move(center, center)
+      board.move(me, center, center)
+      return True
     # move to opposite corner of opponent or move to any open corner
     cornerMove = self.tryCorners()
     if cornerMove is not ():
-      board.move(*cornerMove)
+      board.move(me, *cornerMove)
       return True
     # move anywhere
     anyMove = self.moveRandom()
-    board.move(*anyMove)
-    return True
+    if anyMove is not ():
+      board.move(me, *anyMove)
+      return True
+    # there are no moves left  
+    return False
 
 
 if __name__ == "__main__":
   players = ('x', 'o')
+  size = 3
+  board = Board(players, size)
+  game = Game(board)
+  humanPlayer = 'x' 
+  aiPlayer = 'o'
+  ai = AI(game, aiPlayer)
+
+  raw_input("Welcome to TicTac! Press ENTER to begin.\n")
+
+  while game.ply < size**2 and not game.isOver:
+    print "\n"
+    print board
+    next = raw_input("Enter your next move by typing 'i j' to move " +
+      "to the square in the ith row and jth column. Remember that 0 <= i, j <= " + 
+      str(size-1) + ".\n")
+    i, j = next.split(' ', 1)
+    # makes sure input is valid
+    try:
+      # make sure the input makes sense
+      i = int(i)
+      j = int(j)
+      if i < size and j < size:
+        if board.square(i, j) == None:
+          # make the move indicated by the user
+          board.move('x', i, j)
+          # was this the winning move?
+          if board.isWin(humanPlayer):
+            game.isOver = True
+            game.winner = humanPlayer
+            break
+          # let the AI make the optimal move
+          ai.move()
+          # was this the winning move?
+          if board.isWin(aiPlayer):
+            game.isOver = True
+            game.winner = aiPlayer
+            break
+          # increment the number of plays made
+          game.ply += 2
+        else: 
+          print "This square has already been played!"
+      # if the input doesn't make sense, remind
+      # the user to input data that makes sense
+      else:
+        print "Remember that 0 <= i, j <= " + str(size-1) + ".\n"
+    # if the data isn't valid, alert them
+    except ValueError:
+      print ("Sorry you did not input the row and column number of the square " + 
+        "you want to move in the right format\n")
+  # give the user a recap of the game
+  print "\n"
+  print board
+  if game.winner == humanPlayer:
+    print "Congrats you won!\n"
+  elif game.winner == aiPlayer:
+    print "Oh no! The computer beat you!\n"
+  else:
+    print "Cat game! Good Job!\n"
+
+  sys.exit(0)
