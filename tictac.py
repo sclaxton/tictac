@@ -3,13 +3,15 @@ import random
 from utils import enumerate2
 from copy import deepcopy
 
-
 random.seed()
 
 """The Game class is the top level interface between IO and the rest of the code."""
 class Game(object):
 
-  """Init the game with a new board."""
+  """Init the game with a new board.
+
+  Keywords:
+  board -- object instantiating the Board class"""
   def __init__(self, board):
     self.board = board
     self.players = board.players
@@ -47,6 +49,7 @@ class Board(object):
   def square(self, row, col):
     return self.data[row][col]
 
+  """Method returns an enumerator of squares in the board with two indices."""
   def squares(self):
     data = self.data
     return enumerate2(data)
@@ -309,6 +312,7 @@ class AI(object):
     else: 
       return self.lookAheadGetFork(opponent)
 
+  """Method returns the optimal corner move."""
   def tryCorners(self):
     board = self.board
     size = board.size
@@ -401,7 +405,7 @@ class AI(object):
     # there are no moves left  
     return False
 
-
+# begin the main program
 if __name__ == "__main__":
   players = ('x', 'o')
   size = 3
