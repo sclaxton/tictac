@@ -3,8 +3,6 @@ import random
 from utils import enumerate2
 from copy import deepcopy
 
-random.seed()
-
 """The Game class is the top level interface between IO and the rest of the code."""
 class Game(object):
 
@@ -174,6 +172,7 @@ class AI(object):
     self.player = player
     players = self.board.players
     self.opponent = players[0] if self.player is players[1] else players[1]
+    random.seed()
 
   """Method processes next game states with an aribtarty test.
 
